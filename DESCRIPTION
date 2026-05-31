@@ -1,0 +1,9 @@
+Package: adaptive_model_form_updating_clean
+Title: Adaptive Model-Form Updating Experiments for M4 Monthly Forecasting
+Version: 0.2.0
+Authors@R: person("Harrison", "Katz", role = c("aut", "cre"))
+Description: Consolidated R code for rolling-origin ETS model-form update-frequency experiments and capped adaptive score-gap triggers.
+Depends: R (>= 4.0.0)
+Imports: data.table, forecast, ggplot2
+License: Research use
+Encoding: UTF-8

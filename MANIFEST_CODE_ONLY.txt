@@ -1,0 +1,17 @@
+R/adaptive_update.R
+scripts/install_dependencies.R
+scripts/download_m4.R
+scripts/check_setup.R
+scripts/run_smoke_m4.R
+scripts/run_m4_100_fixed_grid.R
+scripts/run_m4_100_capped.R
+scripts/run_m4_500_capped.R
+scripts/run_m4_experiment.R
+scripts/summarize_existing.R
+scripts/make_readable_figures.R
+README.md
+RUN_THIS_FIRST.md
+DESCRIPTION
+.gitignore
+data/.gitkeep
+outputs/.gitkeep

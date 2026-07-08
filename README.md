@@ -1,29 +1,35 @@
 # re-specification-debt
 
-R code for experiments on adaptive model-form updating in forecasting systems.
+R code and results for the paper "When Should Forecasting Models Be
+Re-Specified? A Cost-Sensitive Trigger for Adaptive Model-Form Updating"
+(arXiv:2606.06670).
 
-The repository reproduces the M4 monthly empirical illustration used in the paper. It compares several model-maintenance policies for ETS forecasting models:
+The repository runs the full empirical evaluation on all 47,982 monthly M4
+series and the simulation experiments reported in Section 8. It compares
+model-maintenance policies for ETS forecasting models:
 
 - full model-form updating at every review period
 - fixed-frequency model-form updating
 - parameter-only updating under a fixed model form
-- capped adaptive updating, where the model form is updated early when a score-gap trigger fires and otherwise updated when it reaches a maximum age
+- capped adaptive updating, where the model form is re-specified early when
+  a score-gap trigger fires and otherwise when it reaches a maximum age
 
-The code is written for interactive R use. The M4 data are downloaded by the setup script and are not stored in the repository.
+The M4 data are downloaded by the setup functions and are not stored in the
+repository. Origin-level records from the full run are large and are not
+committed; the summary outputs that every table and figure in the paper
+rests on are committed, so the analysis and verification steps run on a
+fresh clone without re-running the experiments.
 
 ## Requirements
 
-The scripts use base R plus:
-
-- `data.table`
-- `forecast`
-- `ggplot2`
-
-Install them from R with:
+Base R plus `data.table`, `forecast`, and `ggplot2`:
 
 ```r
 source(file = "scripts/install_dependencies.R")
 ```
+
+Python 3 with matplotlib is needed only to regenerate Figure 3
+(`scripts/gen_fig3.py`); the compiled figure PDFs are committed.
 
 ## Quick start
 
@@ -33,96 +39,102 @@ From the repository root:
 source(file = "scripts/install_dependencies.R")
 source(file = "R/adaptive_update.R")
 
-# Download and check the M4 monthly data.
 download_m4(data_dir = "data", overwrite = FALSE)
 check_m4_loader("data")
 check_ets_smoke(data_dir = "data", train_length = 36L, seed = 123L)
 
-# Small test run.
 source(file = "scripts/run_smoke_m4.R")
 ```
 
-If the smoke run completes, run the calibration and main experiments:
+## Verify the paper's numbers
 
-```r
-source(file = "scripts/run_m4_100_fixed_grid.R")
-source(file = "scripts/run_m4_100_capped.R")
-source(file = "scripts/run_m4_500_capped.R")
+Every number printed in the paper is re-derived from the committed summary
+outputs by one script:
+
+```
+Rscript scripts/verify_paper_numbers.R
 ```
 
-The 500-series run is the main experiment. It can take several hours depending on hardware and the number of parallel workers configured in the script.
+It runs about 190 checks (all Table 2 cells, the Section 8.4 inference,
+every Table 3 cell including the sign-test columns, the horizon sweep,
+both Table 4 blocks, the Figure 3 bins, the cost-weight winner grid, the
+fallback disclosure, and the shock, timing, and held-form tables of
+Appendix C) and prints PASS or FAIL per claim. On a fresh clone this runs without any experiment.
 
-## Main outputs
+## Reproduce the experiments
 
-Each run writes a folder under `outputs/`. The main run writes to:
+The runs behind the paper, in order. The full benchmark is multi-day on a
+single machine; run it in tmux and set the worker count with `--n-jobs`.
 
-```text
-outputs/m4_500_capped/
+```
+# 1. Full 47,982-series benchmark at horizon three (Table 2, Figure 1,
+#    Sections 8.1 and 8.3), then summaries and the origin-level paired split.
+Rscript scripts/run_m4_full_capped.R --n-jobs 8
+Rscript scripts/summarize_streaming.R
+Rscript scripts/paired_diagnostics.R
+
+# 2. Horizon sweep on the fixed 4,000-series subsample (Figure 2, Section 8.4).
+Rscript scripts/run_horizon_sweep.R --n-jobs 8
+
+# 3. Series-level inference for Section 8.4 and Table 3.
+Rscript scripts/series_level_inference.R
+
+# 4. Triggered-origin bridge with cluster bootstrap intervals
+#    (Figure 3 and the slope sentence in Section 8.5).
+Rscript scripts/bridge_uncertainty.R
+
+# 5. Shock battery behind the regime sentence in Section 8.3.
+Rscript scripts/simulate_shock_series.R
+Rscript scripts/run_shock_experiment.R --n-jobs 8
+
+# 6. Timing isolation behind the jitter sentence in Section 8.4.
+Rscript scripts/simulate_timing_isolation.R
+Rscript scripts/run_timing_isolation.R --n-jobs 8
+
+# 7. Drift regime and the frozen-form divergence in Table 4 and Section 8.5.
+Rscript scripts/simulate_drift_regime.R
+Rscript scripts/run_heldform_debt.R --n-jobs 8
+Rscript scripts/analyze_heldform_divergence.R
+
+# Optional: fit and MASE-denominator disclosure counts for Section 8.1.
+Rscript scripts/disclosure_counts.R
 ```
 
-Important files:
+## Committed outputs
 
-| File | Contents |
-|---|---|
-| `records.csv` | Origin-level forecasts, losses, actions, score gaps, and diagnostics |
-| `summary.csv` | Policy-level accuracy, runtime, instability, and re-specification counts |
-| `diagnostics.csv` | Model-form diversity and monitoring diagnostics by policy |
-| `spec_debt_bridge.csv` | Monitoring-origin score gaps and IC-weight specification-debt diagnostics |
-| `spec_debt_bridge_summary.csv` | Summary of the score-gap/specification-debt relationship |
-| `triggered_subset.csv` | Comparison of the capped adaptive policy with `fixed_f8` on triggered and non-triggered series |
-| `frontier.png` | Cost-accuracy frontier |
-| `update_counts.png` | Mean model-form updates per series |
-| `spec_debt_bridge.png` | Score-gap trigger versus IC-weight specification debt |
-| `triggered_series_effects.png` | Loss differences on triggered versus non-triggered series |
+The paper's tables and figures read from these files, committed at their
+canonical paths (see `.gitignore` for the whitelist):
 
-Readable versions of the main figures can be regenerated with:
-
-```r
-source(file = "scripts/make_readable_figures.R")
+```
+outputs/m4_full_capped/summary.csv                    Table 2, Figure 1
+outputs/m4_full_capped/fallback_share.csv             Section 8.1 disclosure
+outputs/m4_full_capped/paired_diagnostics.csv         Section 8.4
+outputs/m4_full_capped/triggered_subset.csv           Section 8.4
+outputs/m4_full_capped/spec_debt_bridge_summary.csv   Table 4, first block
+outputs/horizon_sweep.csv                             Figure 2, Section 8.4
+outputs/series_level_inference.csv                    Table 3, Section 8.4
+outputs/bridge_bins_ci.csv                            Figure 3
+outputs/bridge_regression.csv                         Section 8.5
+outputs/m4_shock_experiment/shock_winner_by_cell.csv  Section 8.3, Appendix C.1
+outputs/m4_shock_experiment/shock_matched_comparison.csv
+outputs/m4_shock_experiment/shock_fire_timing.csv
+outputs/m4_timing_isolation/timing_matched_by_jitter.csv  Appendix C.2
+outputs/m4_timing_isolation/timing_winsum.csv
+outputs/m4_timing_isolation/timing_firetime.csv
+outputs/m4_drift_experiment/heldform_debt_divergence.csv  Table 4, Appendix C.3
 ```
 
-## Diagnostics
+`RESULTS_MANIFEST.md` maps every claim in the paper to its run, file, and
+script.
 
-The capped adaptive policies use a rolling validation score gap as the operational trigger. The score gap is:
+## Citation
 
-```text
-validation loss of deployed form - validation loss of best challenger
+```bibtex
+@misc{katz2026respecify,
+  title  = {When Should Forecasting Models Be Re-Specified?
+            A Cost-Sensitive Trigger for Adaptive Model-Form Updating},
+  author = {Harrison Katz},
+  year   = {2026},
+  note   = {arXiv:2606.06670}
+}
 ```
-
-A positive score gap means the challenger did better on the monitoring window. The threshold column, `tau_cost_ratio`, is the score-unit trigger threshold used by the adaptive policy.
-
-The code also computes closed-grid IC-weight diagnostics for the ETS candidate set:
-
-```text
-spec_debt_aicc = -log(AICc weight of the deployed form)
-spec_debt_bic  = -log(BIC weight of the deployed form)
-```
-
-These diagnostics are computed on the full current training window at monitoring origins. Validation-split versions are retained in columns ending in `_validation`.
-
-`fit_seconds` reports the operational runtime of the policy. The IC-weight diagnostics are audit quantities and their runtime is stored separately in `ic_diagnostic_seconds`.
-
-## Repository layout
-
-```text
-R/
-  adaptive_update.R          # core implementation
-
-scripts/
-  install_dependencies.R     # install required packages
-  download_m4.R              # download M4 monthly data
-  check_setup.R              # data and ETS smoke checks
-  run_smoke_m4.R             # small end-to-end run
-  run_m4_100_fixed_grid.R    # fixed-frequency calibration
-  run_m4_100_capped.R        # capped adaptive calibration
-  run_m4_500_capped.R        # main experiment
-  run_m4_experiment.R        # configurable experiment runner
-  summarize_existing.R       # recompute summaries from records.csv
-  make_readable_figures.R    # regenerate manuscript-friendly figures
-```
-
-## Notes
-
-- The experiments use the M4 monthly train and test files together, then apply the rolling-origin eligibility filter.
-- The main evaluation uses 36 rolling-origin rounds, horizon 3, seasonal period 12, and a fixed training window of 36 observations.
-- The implementation is an empirical illustration of adaptive model-form updating. It is not a full reproduction of all update scenarios in Spiliotis and Petropoulos (2024).

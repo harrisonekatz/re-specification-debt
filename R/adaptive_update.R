@@ -1664,7 +1664,9 @@ run_m4_experiment <- function(
     n_jobs = 1L,
     alpha = 0.0,
     gamma = 0.0,
-    allow_multiplicative = TRUE) {
+    allow_multiplicative = TRUE,
+    batch_size = NULL,
+    resume = TRUE) {
 
   check_required_packages()
   requireNamespace("data.table", quietly = TRUE)
@@ -1704,25 +1706,72 @@ run_m4_experiment <- function(
           if (isTRUE(include_pure_adaptive)) " pure adaptive," else "",
           if (isTRUE(include_capped_adaptive)) " capped adaptive" else "")
 
-  blocks <- parallel_lapply(
-    items,
-    function(item) {
-      safe_run_series(
-        item = item,
-        cfg = cfg,
-        fixed_frequencies = fixed_frequencies,
-        adaptive_thresholds = adaptive_thresholds,
-        adaptive_caps = adaptive_caps,
-        include_pure_adaptive = include_pure_adaptive,
-        include_capped_adaptive = include_capped_adaptive
-      )
-    },
-    n_jobs = n_jobs
-  )
+  run_one <- function(item) {
+    safe_run_series(
+      item = item,
+      cfg = cfg,
+      fixed_frequencies = fixed_frequencies,
+      adaptive_thresholds = adaptive_thresholds,
+      adaptive_caps = adaptive_caps,
+      include_pure_adaptive = include_pure_adaptive,
+      include_capped_adaptive = include_capped_adaptive
+    )
+  }
 
-  records <- data.table::rbindlist(blocks, fill = TRUE)
+  # Default path: run every series in a single pass, exactly as before.
+  if (is.null(batch_size)) {
+    blocks <- parallel_lapply(items, run_one, n_jobs = n_jobs)
+    records <- data.table::rbindlist(blocks, fill = TRUE)
+    if (nrow(records) == 0L) stop("No records produced. Check series lengths and configuration.")
+    return(write_experiment_outputs(records, out_dir, alpha = alpha, gamma = gamma))
+  }
+
+  # Checkpointed path for very large runs (e.g. all M4 monthly series).
+  # Series are independent and each per-series computation is deterministic,
+  # so splitting the SAME item list into contiguous batches and concatenating
+  # the per-batch records reproduces the single-pass result exactly. mclapply
+  # preserves input order, and the summaries are group-by aggregations that do
+  # not depend on row order. Batching only bounds peak memory during the run
+  # and lets an interrupted run resume. It does not change which series are
+  # run, the seeds, the protocol, or any reported number.
+  batch_size <- max(1L, as.integer(batch_size))
+  ensure_dir(out_dir)
+  parts_dir <- file.path(out_dir, "parts")
+  ensure_dir(parts_dir)
+
+  n_items <- length(items)
+  starts <- seq.int(1L, n_items, by = batch_size)
+  n_batches <- length(starts)
+  message("Checkpointed run: ", n_items, " series in ", n_batches,
+          " batch(es) of up to ", batch_size, ". Parts in ", parts_dir)
+
+  for (b in seq_len(n_batches)) {
+    lo <- starts[[b]]
+    hi <- min(lo + batch_size - 1L, n_items)
+    part_path <- file.path(parts_dir, sprintf("records_part_%05d.csv", b))
+    if (isTRUE(resume) && file.exists(part_path)) {
+      message("  batch ", b, "/", n_batches, " (series ", lo, "-", hi, "): exists, skipping")
+      next
+    }
+    t_batch <- Sys.time()
+    blocks <- parallel_lapply(items[lo:hi], run_one, n_jobs = n_jobs)
+    batch_records <- data.table::rbindlist(blocks, fill = TRUE)
+    # Write atomically so an interrupted write never leaves a partial part
+    # that a later resume would mistake for a finished batch.
+    tmp_path <- paste0(part_path, ".tmp")
+    data.table::fwrite(batch_records, tmp_path)
+    file.rename(tmp_path, part_path)
+    message("  batch ", b, "/", n_batches, " (series ", lo, "-", hi, "): ",
+            nrow(batch_records), " rows, ",
+            round(as.numeric(difftime(Sys.time(), t_batch, units = "mins")), 1), " min")
+    rm(blocks, batch_records)
+    gc(verbose = FALSE)
+  }
+
+  part_files <- sort(list.files(parts_dir, pattern = "^records_part_[0-9]+\\.csv$", full.names = TRUE))
+  if (length(part_files) == 0L) stop("No record parts were written.")
+  records <- data.table::rbindlist(lapply(part_files, data.table::fread), fill = TRUE)
   if (nrow(records) == 0L) stop("No records produced. Check series lengths and configuration.")
-
   write_experiment_outputs(records, out_dir, alpha = alpha, gamma = gamma)
 }
 

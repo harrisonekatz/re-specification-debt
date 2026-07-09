@@ -1,0 +1,5 @@
+shock_type,severity,n_fired,shock_round,median_fire_round,frac_at_first_monitor,frac_in_reaction_window
+level_shift,large,592,19,30,0,0.01
+level_shift,small,316,19,30,0,0
+transient_burst,med,310,19,30,0.01,0.01
+variance_shift,high,3,19,30,0,0.33

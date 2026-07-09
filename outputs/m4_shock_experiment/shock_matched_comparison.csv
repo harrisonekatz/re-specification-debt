@@ -1,0 +1,17 @@
+shock_type,severity,pair,n,mean_gap,se,t,median_gap,trimmed_gap
+control,none,adaptive_cap8_tau0.8 vs fixed_f8,600,0,5e-05,-0.09,0,0
+additive_outlier,low,adaptive_cap8_tau0.8 vs fixed_f8,600,-0.06463,0.00708,-9.13,0,-0.03846
+additive_outlier,high,adaptive_cap8_tau0.8 vs fixed_f8,600,-0.04889,0.00552,-8.85,0,-0.03464
+level_shift,small,adaptive_cap8_tau0.8 vs fixed_f8,600,0.06244,0.00279,22.38,0.0105,0.05898
+level_shift,large,adaptive_cap8_tau0.8 vs fixed_f8,600,0.01094,0.00104,10.51,0.01549,0.01164
+transient_burst,med,adaptive_cap8_tau0.8 vs fixed_f8,600,0.00285,0.00118,2.42,0,0.00139
+variance_shift,high,adaptive_cap8_tau0.8 vs fixed_f8,600,-1e-04,1e-04,-1,0,0
+heavy_tail,df3,adaptive_cap8_tau0.8 vs fixed_f8,600,-0.00228,0.001,-2.27,0,0
+control,none,adaptive_cap12_tau0.8 vs fixed_f12,600,0.00014,0.00012,1.22,0,0
+additive_outlier,low,adaptive_cap12_tau0.8 vs fixed_f12,600,-0.05944,0.00788,-7.54,0,-0.02808
+additive_outlier,high,adaptive_cap12_tau0.8 vs fixed_f12,600,-0.05385,0.0062,-8.69,0,-0.03334
+level_shift,small,adaptive_cap12_tau0.8 vs fixed_f12,600,0.06162,0.00276,22.3,0.00785,0.05865
+level_shift,large,adaptive_cap12_tau0.8 vs fixed_f12,600,0.01067,0.00106,10.03,0.01476,0.01142
+transient_burst,med,adaptive_cap12_tau0.8 vs fixed_f12,600,0.00551,0.00133,4.16,0,0.00461
+variance_shift,high,adaptive_cap12_tau0.8 vs fixed_f12,600,-0.00016,0.00012,-1.3,0,0
+heavy_tail,df3,adaptive_cap12_tau0.8 vs fixed_f12,600,-0.00296,0.00124,-2.39,0,0

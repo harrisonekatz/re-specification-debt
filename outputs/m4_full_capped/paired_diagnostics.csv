@@ -1,0 +1,2 @@
+policy_a,policy_b,n_paired,n_divergent,se_unpaired,se_paired,t_all,t_divergent_only,pct_trigger_worse,sign_z,mean_gap,median_gap,trimmed_gap,tail_mean_gap,tail_pct_trigger_wins,tail_share_of_sum,tail_n_series,tail_top10_mass_pct
+adaptive_cap8_tau0.8,fixed_f8,1727352,153466,0.00374839826898889,0.000122563221659279,8.29907649984534,8.30074921455077,51.9489658947259,15.2700451749496,0.0114487641708102,0.000137063273874499,0.0132876582333299,-0.0346601961008866,51.0294500912171,-15.1384714867924,3492,1.85813130494432

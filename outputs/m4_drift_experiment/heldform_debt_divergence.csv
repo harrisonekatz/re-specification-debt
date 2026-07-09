@@ -1,0 +1,7 @@
+drift_mode,noise,icdebt_vs_loss,scoregap_vs_loss,icdebt_vs_scoregap,n
+irregular,clean,0.253,0.595,0.39,7200
+irregular,noisy,-0.085,0.342,-0.214,7200
+regular,clean,-0.077,0.205,0.169,7200
+regular,noisy,0.02,0.227,0.018,7200
+static,clean,0.022,0.044,-0.013,7200
+static,noisy,-0.354,0.408,-0.567,7200

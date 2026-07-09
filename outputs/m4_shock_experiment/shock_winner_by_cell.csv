@@ -1,0 +1,9 @@
+shock_type,severity,winner,winner_rl
+additive_outlier,high,adaptive_tau0.2,0.91825
+additive_outlier,low,adaptive_tau0.4,0.89312
+control,none,full_update,1
+heavy_tail,df3,adaptive_tau1.5,0.99024
+level_shift,large,full_update,1
+level_shift,small,full_update,1
+transient_burst,med,parameter_only,0.9356
+variance_shift,high,adaptive_tau0.8,0.9961

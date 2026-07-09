@@ -1,0 +1,6 @@
+jitter,jitter_num,fires_per_series,frac_near_switch
+static,-1,0.027,0
+J0_regular,0,8.328,0.15
+J4,4,8.287,0.14
+J8,8,8.015,0.14
+J12_irregular,12,7.452,0.15

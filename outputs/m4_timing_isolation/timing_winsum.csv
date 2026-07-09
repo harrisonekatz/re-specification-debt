@@ -1,0 +1,6 @@
+jitter,jitter_num,winner,best_adaptive,best_ada_rl,best_fixed_rl,ada_beats_cadence
+static,-1,adaptive_cap8_tau0.8,adaptive_cap8_tau0.8,0.9969,0.9969,TRUE
+J0_regular,0,full_update,adaptive_cap8_tau1.5,1.1119,1.018,FALSE
+J4,4,fixed_f6,adaptive_cap8_tau0.8,1.0292,0.9876,FALSE
+J8,8,adaptive_cap8_tau0.2,adaptive_cap8_tau0.2,0.977,0.9833,TRUE
+J12_irregular,12,adaptive_cap8_tau0.4,adaptive_cap8_tau0.4,0.9408,1.0209,TRUE

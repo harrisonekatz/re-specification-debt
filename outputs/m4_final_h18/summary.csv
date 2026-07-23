@@ -1,0 +1,3 @@
+policy,mean_loss,total_fit_seconds,mean_fit_seconds,respecifications,n_records,n_series,mean_instability,relative_loss,relative_time,relative_instability,mean_respecifications_per_series,total_cost_index
+fixed_f4,1.11697916583922,14021.8220000022,0.0973737638889042,36000,144000,4000,3.72924043835699,1,1,1,9,1
+scoregate_aicc_cap8_tau0.8,1.11702229577766,17441.5190000012,0.12112165972223,20825,144000,4000,3.66424995255229,1.00003861301962,1.24388392606884,0.982572728447262,5.20625,1.00003861301962

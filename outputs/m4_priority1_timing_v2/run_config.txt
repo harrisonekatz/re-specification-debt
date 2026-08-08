@@ -1,0 +1,11 @@
+priority1 run configuration
+timestamp: 2026-07-27 17:55:00 UTC
+data_dir: data
+eligible_series: 2000 (min_obs 89, n_series arg -1)
+horizon: 18 | n_rounds: 36 | train_length: 36 | seasonality: 12
+monitor_window: 12 | monitor_every: 6
+policies: full_update,parameter_only,fixed_f4,fixed_f8,validation_gate,aicc_gate,trigg
+tau: 0.8 | cap: 8
+trigg_limit: 0.6 | trigg_alpha: 0.2 | trigg_signal_every: 1 | trigg_warmup: 3
+seed: 123 | batch_size: 250 | n_jobs: 8
+R: R version 4.5.1 (2025-06-13) | forecast: 9.0.2 | data.table: 1.18.4

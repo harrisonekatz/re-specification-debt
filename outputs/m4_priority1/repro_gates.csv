@@ -1,0 +1,4 @@
+gate,horizon,expected,observed,abs_gap,tol,status
+validation gate vs fixed_f8,18,-0.0043,-0.00426479195994115,3.52080400588461e-05,0.001,PASS
+trigg vs fixed_f8,18,-0.0011,-0.00107922645845197,2.07735415480351e-05,0.001,PASS
+trigg vs validation gate,18,0.0032,0.00318556550148919,1.44344985108106e-05,0.001,PASS

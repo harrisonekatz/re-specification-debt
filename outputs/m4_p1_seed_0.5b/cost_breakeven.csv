@@ -1,0 +1,3 @@
+horizon,policy_a,policy_b,dloss,dseconds_per_series,dinstability,seconds_per_0.001_mase,alpha_star,gamma_star,anchor
+18,aicc_gate_cap8_tau0.8,fixed_f8,0.00168257698651919,1.23706846908267,-0.00451615050641863,0.735222506306735,0.0121452424485204,-1.56974529053722,full_update (timing stratum)
+18,adaptive_cap8_tau0.8,fixed_f8,0.00426479195994123,1.21280253841714,0.0407677565567433,0.284375545116591,0.0314002232120315,0.440761537127378,full_update (timing stratum)
